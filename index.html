@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detection System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Fake News Detection System</h1>
+        <div class="input-section">
+            <textarea id="text-input" placeholder="Enter text to analyze..."></textarea>
+            <button onclick="analyzeText()">Analyze Text</button>
+        </div>
+        <div class="result-section">
+            <div id="result" class="result-box">
+                Results will appear here...
+            </div>
+        </div>
+    </div>
+    <script>
+        function analyzeText() {
+            const textInput = document.getElementById('text-input');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                document.getElementById('result').innerHTML = 'Please enter some text to analyze';
+                return;
+            }
+
+            fetch('http://localhost:3000/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                const resultDiv = document.getElementById('result');
+                if (data.result === "INVALID") {
+                    resultDiv.innerHTML = "Invalid or unreadable text. Please enter proper text.";
+                    resultDiv.className = "result-box invalid";
+                } else {
+                    resultDiv.innerHTML = `<p>This text is: ${data.result}</p>`;
+                    resultDiv.className = `result-box ${data.result.toLowerCase()}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = error.message || 'Error analyzing text';
+            });
+        }
+    </script>
+</body>
+</html>
